@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Colour Palette">
 <meta name="theme-color" content="#f3eee8">
+<link rel="manifest" href="./manifest.json">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -401,7 +402,9 @@ input[type=range]::-moz-range-thumb {
 
 .scale-grid {
   display: flex; flex-direction: column;
-  width: 100vw; height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  padding-bottom: 72px; /* space for save/download buttons */
 }
 
 .swatch {
@@ -410,8 +413,12 @@ input[type=range]::-moz-range-thumb {
   padding: 0 clamp(20px, 5vw, 56px);
   overflow: hidden;
   transition: flex 0.45s cubic-bezier(0.4,0,0.2,1);
+  min-height: 0; /* allow flex to shrink properly */
 }
-.swatch:hover { flex: 3; }
+/* hover expand only on non-touch devices */
+@media (hover: hover) {
+  .swatch:hover { flex: 3; }
+}
 
 .swatch.reveal {
   animation: revealSw 0.55s cubic-bezier(0.22,1,0.36,1) both;
@@ -449,14 +456,21 @@ input[type=range]::-moz-range-thumb {
   gap: 4px;
 }
 
-.scale-save-btn {
+.scale-btns {
   position: fixed;
   bottom: 24px; left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+}
+
+.scale-save-btn,
+.scale-dl-btn {
   background: rgba(255,255,255,0.82);
   border: 1px solid rgba(255,255,255,0.95);
   border-radius: 100px;
-  padding: 11px 28px;
+  padding: 11px 24px;
   font-family: var(--font);
   font-size: 11px;
   letter-spacing: 0.18em;
@@ -466,16 +480,17 @@ input[type=range]::-moz-range-thumb {
   backdrop-filter: blur(12px);
   box-shadow: 0 4px 20px rgba(0,0,0,0.18);
   transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-  z-index: 10;
   white-space: nowrap;
 }
-.scale-save-btn:hover {
+.scale-save-btn:hover,
+.scale-dl-btn:hover {
   background: rgba(255,255,255,0.96);
-  transform: translateX(-50%) scale(1.04);
+  transform: scale(1.04);
   box-shadow: 0 6px 26px rgba(0,0,0,0.22);
 }
-.scale-save-btn:active {
-  transform: translateX(-50%) scale(0.98);
+.scale-save-btn:active,
+.scale-dl-btn:active {
+  transform: scale(0.98);
 }
 
 .back-hint {
@@ -603,7 +618,10 @@ input[type=range]::-moz-range-thumb {
 <div class="page hidden" id="page-scale">
   <div class="scale-grid" id="scale-grid"></div>
   <div class="back-hint">Tap to return</div>
-  <button class="scale-save-btn" id="scale-save-btn">&#43; Save palette</button>
+  <div class="scale-btns">
+    <button class="scale-save-btn" id="scale-save-btn">&#43; Save</button>
+    <button class="scale-dl-btn" id="scale-dl-btn">&#x2193; Download</button>
+  </div>
   <div class="copyright" style="color:rgba(255,255,255,0.18);">© 2026 Triple.Cell_illustration — 細胞日常插畫</div>
 </div>
 
@@ -871,9 +889,12 @@ function generateScale(r,g,b){
 }
 
 // ── Navigation ───────────────────────────────────────────────
+var currentColors=[];
+
 document.getElementById("next-btn").addEventListener("click",function(){
   var rgb=hsbToRgb(state.h,state.s,state.b);
   var colors=generateScale(rgb.r,rgb.g,rgb.b);
+  currentColors=colors;
   var grid=document.getElementById("scale-grid");
   grid.innerHTML="";
   colors.forEach(function(c,i){
@@ -930,6 +951,167 @@ document.getElementById("scale-save-btn").addEventListener("click",function(e){
   renderChips();
   showToast("Palette saved");
 });
+
+// Download palette as PNG image
+document.getElementById("scale-dl-btn").addEventListener("click",function(e){
+  e.stopPropagation();
+  if(!currentColors||currentColors.length===0){showToast("No palette to download");return;}
+
+  var swatchW=320, swatchH=80, infoW=220;
+  var totalW=swatchW+infoW, totalH=swatchH*9;
+  var canvas=document.createElement("canvas");
+  canvas.width=totalW*2; canvas.height=totalH*2; // 2x for retina
+  var ctx=canvas.getContext("2d");
+  ctx.scale(2,2);
+
+  // background
+  ctx.fillStyle="#1a1a22";
+  ctx.fillRect(0,0,totalW,totalH);
+
+  currentColors.forEach(function(c,i){
+    var y=i*swatchH;
+
+    // colour swatch block
+    ctx.fillStyle=c.hex;
+    ctx.fillRect(0,y,swatchW,swatchH);
+
+    // info panel
+    ctx.fillStyle="#1e1e28";
+    ctx.fillRect(swatchW,y,infoW,swatchH);
+
+    // separator line
+    ctx.fillStyle="rgba(255,255,255,0.06)";
+    ctx.fillRect(0,y+swatchH-1,totalW,1);
+
+    // luminance-based text colour
+    var lum=0.299*c.r+0.587*c.g+0.114*c.b;
+    var swatchTxt=lum>138?"rgba(20,20,28,0.85)":"rgba(255,255,255,0.9)";
+
+    // hex on swatch
+    ctx.font="bold 13px monospace";
+    ctx.fillStyle=swatchTxt;
+    ctx.fillText(c.hex, 16, y+swatchH/2+5);
+
+    // CMYK on info panel
+    var cmyk=rgbToCmyk(c.r,c.g,c.b);
+    ctx.font="11px monospace";
+    ctx.fillStyle="rgba(255,255,255,0.55)";
+    ctx.fillText("C"+cmyk.c+" M"+cmyk.m+" Y"+cmyk.y+" K"+cmyk.k, swatchW+12, y+swatchH/2-6);
+
+    // RGB
+    ctx.font="10px monospace";
+    ctx.fillStyle="rgba(255,255,255,0.32)";
+    ctx.fillText("R"+c.r+" G"+c.g+" B"+c.b, swatchW+12, y+swatchH/2+12);
+  });
+
+  // branding footer
+  ctx.fillStyle="#14141c";
+  ctx.fillRect(0,totalH,totalW,24);
+  ctx.font="9px monospace";
+  ctx.fillStyle="rgba(255,255,255,0.2)";
+  ctx.fillText("© 2026 Triple.Cell_illustration — Colour Palette", 12, totalH+16);
+
+  // trigger download — iOS Safari compatible
+  var base=currentColors[4]?currentColors[4].hex.replace("#",""):"palette";
+  try {
+    var dataUrl=canvas.toDataURL("image/png");
+    // iOS Safari: open in new tab so user can long-press save
+    var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+    if(isIOS){
+      var w=window.open("","_blank");
+      if(w){
+        w.document.write(
+          "<html><head><title>palette-"+base+"</title></head><body style=\"margin:0;background:#111;\">"
+          +"<p style=\"color:#fff;font-family:sans-serif;font-size:12px;padding:12px;margin:0;\">"
+          +"長按圖片 → 儲存照片</p>"
+          +"<img src=\""+dataUrl+"\" style=\"width:100%;display:block;\">"
+          +"</body></html>"
+        );
+        w.document.close();
+        showToast("長按圖片以儲存");
+      } else {
+        showToast("請允許彈出視窗");
+      }
+    } else {
+      var a=document.createElement("a");
+      a.href=dataUrl;
+      a.download="palette-"+base+".png";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast("Downloaded!");
+    }
+  } catch(err) {
+    showToast("下載失敗，請再試");
+    console.error(err);
+  }
+});
+</script>
+
+<!-- Update notification banner -->
+<div id="update-banner" style="
+  display:none;
+  position:fixed;top:0;left:0;right:0;
+  background:rgba(79,88,109,0.95);
+  color:#fff;
+  font-family:'Asimovian',serif;
+  font-size:0.65rem;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  padding:12px 16px;
+  text-align:center;
+  z-index:9999;
+  backdrop-filter:blur(12px);
+  cursor:pointer;
+">
+  ✦ New version available — tap to update
+</div>
+
+<script>
+// ── Service Worker registration ───────────────────────────
+if ('serviceWorker' in navigator) {
+  // Only register SW when served from a real domain (not claude.ai preview)
+  var isPreview = window.location.hostname.includes('claude') ||
+                  window.location.hostname.includes('anthropic') ||
+                  window.location.protocol === 'file:';
+  if (!isPreview) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(function(reg) {
+
+        // Check for updates every time the page gains focus
+        document.addEventListener('visibilitychange', function() {
+          if (document.visibilityState === 'visible') reg.update();
+        });
+
+        // New SW waiting → show update banner
+        reg.addEventListener('updatefound', function() {
+          var newWorker = reg.installing;
+          newWorker.addEventListener('statechange', function() {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              document.getElementById('update-banner').style.display = 'block';
+            }
+          });
+        });
+
+        // Tap banner → activate new SW and reload
+        document.getElementById('update-banner').addEventListener('click', function() {
+          if (reg.waiting) {
+            reg.waiting.postMessage('skipWaiting');
+          }
+        });
+
+        // When new SW takes control → reload to get fresh page
+        navigator.serviceWorker.addEventListener('controllerchange', function() {
+          window.location.reload();
+        });
+      })
+      .catch(function(err) {
+        console.log('SW registration failed:', err);
+      });
+  });
+  } // end isPreview check
+}
 </script>
 </body>
 </html>
