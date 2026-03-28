@@ -136,22 +136,7 @@ html, body {
   line-height: 1;
 }
 
-/* Save button inside colour block */
-.save-btn-inline {
-  background: rgba(255,255,255,0.18);
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 8px;
-  padding: 5px 10px;
-  color: rgba(255,255,255,0.8);
-  font-family: var(--font);
-  font-size: 0.52rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.18s;
-  margin-top: 4px;
-}
-.save-btn-inline:hover { background: rgba(255,255,255,0.28); }
+
 
 /* Hex input row */
 .hex-input-row {
@@ -557,9 +542,8 @@ input[type=range]::-moz-range-thumb {
 
   <!-- Glass card — colour block only -->
   <div class="glass-card">
-    <div class="colour-block" id="colour-block">
+    <div class="colour-block" id="colour-block" style="cursor:pointer;">
       <span class="hex-label" id="hex-label">#4D586F</span>
-      <button class="save-btn-inline" id="save-btn">&#43; Save palette</button>
     </div>
   </div>
 
@@ -773,6 +757,7 @@ updateUI(false);
 
 // ── Saved palette ────────────────────────────────────────────
 // savedPalettes: array of arrays, each inner array = 9 hex strings
+var DEFAULT_PALETTE_DATA = ["#E2DCDA","#DBCECD","#D4C0BF","#CFB1B0","#CC9F9F","#B7868A","#9E7178","#7C6067","#615257"];
 var savedPalettes = JSON.parse(localStorage.getItem("cb_palettes")||"[]");
 
 function storePalettes(){localStorage.setItem("cb_palettes",JSON.stringify(savedPalettes));}
@@ -787,11 +772,33 @@ function showToast(msg){
 function renderChips(){
   var wrap=document.getElementById("saved-chips");
   wrap.innerHTML="";
-  if(savedPalettes.length===0){
-    var empty=document.createElement("span");
-    empty.className="saved-empty";
-    empty.textContent="No palettes saved yet";
-    wrap.appendChild(empty);
+  // If no saved palettes, show default CC9F9F palette as preview
+  var displayList = savedPalettes.length > 0 ? savedPalettes : [DEFAULT_PALETTE_DATA];
+  var isDefault = savedPalettes.length === 0;
+
+  if(savedPalettes.length === 0){
+    // show default chip with a label
+    var defaultChip = document.createElement("div");
+    defaultChip.className = "palette-chip";
+    var defaultInner = document.createElement("div");
+    defaultInner.className = "palette-inner";
+    DEFAULT_PALETTE_DATA.forEach(function(hex){
+      var strip = document.createElement("div");
+      strip.className = "palette-strip";
+      strip.style.background = hex;
+      defaultInner.appendChild(strip);
+    });
+    defaultChip.appendChild(defaultInner);
+    // click to load CC9F9F
+    defaultChip.addEventListener("click", function(){
+      var rgb = hexToRgb("CC9F9F");
+      if(rgb){ var hsb=rgbToHsb(rgb.r,rgb.g,rgb.b); state.h=hsb.h; state.s=hsb.s; state.b=hsb.b; _suppressSlider=true; updateUI(false); _suppressSlider=false; }
+    });
+    wrap.appendChild(defaultChip);
+    var hint = document.createElement("span");
+    hint.className = "saved-empty";
+    hint.textContent = "Sample — save yours to replace";
+    wrap.appendChild(hint);
     return;
   }
   savedPalettes.forEach(function(palette,pIdx){
@@ -881,21 +888,7 @@ function renderChips(){
 }
 renderChips();
 
-// Save btn on page 1 — saves current scale as palette
-document.getElementById("save-btn").addEventListener("click",function(){
-  var rgb=hsbToRgb(state.h,state.s,state.b);
-  var colors=generateScale(rgb.r,rgb.g,rgb.b);
-  var hexArr=colors.map(function(c){return c.hex;});
-  // check duplicate by base colour (index 4)
-  var base=hexArr[4];
-  var dup=savedPalettes.some(function(p){return p[4]===base;});
-  if(dup){showToast("Already saved");return;}
-  if(savedPalettes.length>=10){showToast("Max 10 palettes");return;}
-  savedPalettes.push(hexArr);
-  storePalettes();
-  renderChips();
-  showToast("Palette saved");
-});
+
 
 // ── Scale generator ──────────────────────────────────────────
 function rgbToHsl(r,g,b){
@@ -937,7 +930,12 @@ function generateScale(r,g,b){
 // ── Navigation ───────────────────────────────────────────────
 var currentColors=[];
 
-document.getElementById("next-btn").addEventListener("click",function(){
+// Click colour block → go to page 2
+document.getElementById("colour-block").addEventListener("click",function(){
+  goToScale();
+});
+
+function goToScale(){
   var rgb=hsbToRgb(state.h,state.s,state.b);
   var colors=generateScale(rgb.r,rgb.g,rgb.b);
   currentColors=colors;
@@ -961,6 +959,10 @@ document.getElementById("next-btn").addEventListener("click",function(){
   });
   document.getElementById("page-pick").classList.add("hidden");
   document.getElementById("page-scale").classList.remove("hidden");
+}
+
+document.getElementById("next-btn").addEventListener("click",function(){
+  goToScale();
 });
 
 // Tap anywhere on scale page to return, load tapped colour if on a swatch
