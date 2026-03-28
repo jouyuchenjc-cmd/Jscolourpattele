@@ -2,7 +2,7 @@
 // Colour Palette — Service Worker
 // 每次更新 index.html 時，把下面日期改成今天的日期再一起上傳
 // ============================================================
-const VERSION = 'colour-palette-20260328';
+const VERSION = 'colour-palette-20260329';
 
 const ASSETS = [
   './',
