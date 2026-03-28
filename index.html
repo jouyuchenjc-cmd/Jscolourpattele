@@ -918,8 +918,10 @@ document.getElementById("next-btn").addEventListener("click",function(){
 });
 
 document.getElementById("page-scale").addEventListener("click",function(e){
-  // ignore scale-save-btn
+  // ignore buttons area
   if(e.target.closest(".scale-save-btn"))return;
+  if(e.target.closest(".scale-dl-btn"))return;
+  if(e.target.closest(".scale-btns"))return;
   // Load clicked swatch colour back to picker
   var swatch=e.target.closest(".swatch");
   var hex=swatch?swatch.dataset.hex:null;
@@ -1021,9 +1023,15 @@ document.getElementById("scale-dl-btn").addEventListener("click",function(e){
       var w=window.open("","_blank");
       if(w){
         w.document.write(
-          "<html><head><title>palette-"+base+"</title></head><body style=\"margin:0;background:#111;\">"
-          +"<p style=\"color:#fff;font-family:sans-serif;font-size:12px;padding:12px;margin:0;\">"
+          "<html><head><title>palette-"+base+"</title>"
+          +"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+          +"</head><body style=\"margin:0;background:#111;\">"
+          +"<div style=\"background:#222;padding:20px 16px;text-align:center;\">"
+          +"<p style=\"color:#fff;font-family:sans-serif;font-size:18px;font-weight:600;margin:0 0 6px;\">"
           +"長按圖片 → 儲存照片</p>"
+          +"<p style=\"color:rgba(255,255,255,0.45);font-family:sans-serif;font-size:13px;margin:0;\">"
+          +"Long press the image to save</p>"
+          +"</div>"
           +"<img src=\""+dataUrl+"\" style=\"width:100%;display:block;\">"
           +"</body></html>"
         );
