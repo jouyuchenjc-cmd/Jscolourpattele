@@ -5,7 +5,9 @@
 <script>
 // Old GitHub Pages address -> new custom domain
 if (location.hostname === "jouyuchenjc-cmd.github.io") {
-  location.replace("https://palette.triplecells.com/" + location.search + location.hash);
+  var _mv = "";
+  try { var _raw = localStorage.getItem("cb_palettes"); if (_raw && _raw !== "[]") _mv = "#cbimport=" + encodeURIComponent(_raw); } catch (e) {}
+  location.replace("https://palette.triplecells.com/" + location.search + (_mv || location.hash));
 }
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -893,6 +895,19 @@ var savedPalettes = (function(){
   return out;
 })();
 var MAX_SAVED=30;
+// One-time import of colours carried over from the old github.io address (via #cbimport=...)
+(function(){
+  var m=/[#&]cbimport=([^&]+)/.exec(location.hash);
+  if(!m)return;
+  try{
+    JSON.parse(decodeURIComponent(m[1])).forEach(function(p){
+      var h=Array.isArray(p)?p[4]:p;
+      if(typeof h==="string"&&/^#[0-9a-f]{6}$/i.test(h)){h=h.toUpperCase();if(savedPalettes.indexOf(h)<0&&savedPalettes.length<MAX_SAVED)savedPalettes.push(h);}
+    });
+    localStorage.setItem("cb_palettes",JSON.stringify(savedPalettes));
+  }catch(e){}
+  try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}
+})();
 
 function storePalettes(){localStorage.setItem("cb_palettes",JSON.stringify(savedPalettes));}
 
