@@ -385,30 +385,30 @@ html, body {
 
 
 /* ══ PHOTO PICKER ══ */
+.photo-btn.active{background:var(--btn);color:#fff;}
 .photo-btn{width:min(84vw,340px);padding:13px 24px;border-radius:100px;border:1.5px solid rgba(79,88,109,0.28);background:rgba(255,255,255,0.45);color:var(--btn);font-family:var(--font);font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;flex-shrink:0;transition:transform .15s,background .2s;}
 .photo-btn:hover{background:rgba(255,255,255,0.7);transform:translateY(-1px);}
 .photo-btn:active{transform:translateY(1px);}
-#page-photo{display:flex;flex-direction:column;align-items:center;overflow-y:auto;overflow-x:hidden;padding:18px 20px 28px;gap:12px;background:var(--bg);}
-.ph-top{width:min(90vw,380px);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;}
-.ph-title{font-size:0.62rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--btn);opacity:.6;}
-.ph-close{width:34px;height:34px;border-radius:50%;border:none;background:rgba(79,88,109,0.12);color:var(--btn);font-size:18px;cursor:pointer;line-height:1;}
+#photo-panel{display:none;flex-direction:column;align-items:center;gap:10px;width:min(84vw,340px);flex-shrink:0;}
+#photo-panel.open{display:flex;}
+.ph-pickrow{width:100%;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.ph-sw{width:40px;height:40px;border-radius:10px;border:1.5px solid rgba(255,255,255,.7);box-shadow:0 2px 8px rgba(0,0,0,.14);background:rgba(79,88,109,.1);flex-shrink:0;}
+.ph-hex{font-size:0.85rem;letter-spacing:0.12em;color:var(--btn);}
+.ph-down{margin-left:auto;font-size:0.52rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--btn);opacity:.5;}
+.ph-label{width:min(84vw,340px);font-size:0.55rem;letter-spacing:0.24em;text-transform:uppercase;color:var(--btn);opacity:.38;flex-shrink:0;}
+
 .ph-pill{padding:9px 14px;border-radius:100px;border:1.5px solid rgba(79,88,109,0.28);background:rgba(255,255,255,0.5);color:var(--btn);font-family:var(--font);font-size:0.58rem;letter-spacing:0.16em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .ph-pill.on{background:var(--btn);color:#fff;border-color:var(--btn);}
-.ph-stage{position:relative;width:min(90vw,380px);min-height:200px;border-radius:14px;overflow:hidden;background:rgba(79,88,109,0.08);flex-shrink:0;}
+.ph-stage{position:relative;width:100%;min-height:200px;border-radius:14px;overflow:hidden;background:rgba(79,88,109,0.08);flex-shrink:0;}
 .ph-stage canvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair;}
 .ph-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--btn);opacity:.5;pointer-events:none;}
 .ph-ring{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 0 0 1.5px rgba(0,0,0,.45),inset 0 0 0 1.5px rgba(0,0,0,.45);pointer-events:none;display:none;}
-.ph-row{width:min(90vw,380px);display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex-shrink:0;}
-.ph-temp{width:min(90vw,380px);display:flex;align-items:center;gap:10px;font-size:0.55rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--btn);opacity:.75;flex-shrink:0;}
+.ph-row{width:100%;display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex-shrink:0;}
+.ph-temp{width:100%;display:flex;align-items:center;gap:10px;font-size:0.55rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--btn);opacity:.75;flex-shrink:0;}
 .ph-temp input{flex:1;accent-color:var(--btn);}
-.ph-hint{width:min(90vw,380px);font-size:0.55rem;letter-spacing:0.14em;color:var(--btn);opacity:.5;text-align:center;flex-shrink:0;min-height:1em;}
-.ph-dom{width:min(90vw,380px);display:flex;gap:8px;flex-shrink:0;}
+.ph-hint{width:100%;font-size:0.55rem;letter-spacing:0.14em;color:var(--btn);opacity:.5;text-align:center;flex-shrink:0;min-height:1em;}
+.ph-dom{width:100%;display:flex;gap:8px;flex-shrink:0;}
 .ph-dom button{flex:1;height:42px;border-radius:10px;border:1.5px solid rgba(255,255,255,.7);box-shadow:0 2px 8px rgba(0,0,0,.12);cursor:pointer;}
-.ph-pickrow{width:min(90vw,380px);display:flex;align-items:center;gap:12px;flex-shrink:0;}
-.ph-sw{width:46px;height:46px;border-radius:12px;border:1.5px solid rgba(255,255,255,.7);box-shadow:0 2px 8px rgba(0,0,0,.14);background:rgba(79,88,109,.1);flex-shrink:0;}
-.ph-hex{flex:1;font-size:0.9rem;letter-spacing:0.12em;color:var(--btn);}
-.ph-use{width:auto;padding:13px 26px;font-size:0.75rem;}
-.ph-use:disabled{opacity:.35;pointer-events:none;}
 
 /* ══ PAGE 2 ══ */
 #page-scale {
@@ -571,6 +571,38 @@ html, body {
     <div class="pick-label">Pick a Colour</div>
   </div>
 
+  <button class="photo-btn" id="photo-btn">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2.5 6.2A1.7 1.7 0 0 1 4.2 4.5h1.3l1-1.5h5l1 1.5h1.3a1.7 1.7 0 0 1 1.7 1.7v6.6a1.7 1.7 0 0 1-1.7 1.7H4.2a1.7 1.7 0 0 1-1.7-1.7V6.2Z" stroke="#4f586d" stroke-width="1.4" stroke-linejoin="round"/><circle cx="9" cy="9.4" r="2.6" stroke="#4f586d" stroke-width="1.4"/></svg>
+    Pick from Photo
+  </button>
+
+  <div id="photo-panel">
+    <div class="ph-row">
+      <button class="ph-pill" id="ph-cam-btn">Camera</button>
+      <button class="ph-pill" id="ph-lib-btn">Library</button>
+      <input type="file" id="ph-cam" accept="image/*" capture="environment" hidden>
+      <input type="file" id="ph-lib" accept="image/*" hidden>
+    </div>
+    <div class="ph-stage" id="ph-stage">
+      <canvas id="ph-canvas" width="4" height="3"></canvas>
+      <div class="ph-ring" id="ph-ring"></div>
+      <div class="ph-empty" id="ph-empty">Take a photo or choose one</div>
+    </div>
+    <div class="ph-row">
+      <button class="ph-pill" id="ph-wb-btn">White point</button>
+      <button class="ph-pill" id="ph-wb-reset">Reset</button>
+    </div>
+    <div class="ph-temp"><span>Cool</span><input type="range" id="ph-temp" min="-100" max="100" value="0"><span>Warm</span></div>
+    <div class="ph-hint" id="ph-hint">Tap the photo to pick a colour</div>
+    <div class="ph-dom" id="ph-dom"></div>
+    <div class="ph-pickrow">
+      <div class="ph-sw" id="ph-sw"></div>
+      <div class="ph-hex" id="ph-hex">&mdash;</div>
+      <div class="ph-down">&darr; fine-tune below</div>
+    </div>
+  </div>
+
+  <div class="ph-label">Fine-tune</div>
   <!-- Glass card — colour block only -->
   <div class="glass-card">
     <div class="colour-block" id="colour-block" style="cursor:pointer;">
@@ -602,10 +634,15 @@ html, body {
     </div>
   </div>
 
-  <button class="photo-btn" id="photo-btn">
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2.5 6.2A1.7 1.7 0 0 1 4.2 4.5h1.3l1-1.5h5l1 1.5h1.3a1.7 1.7 0 0 1 1.7 1.7v6.6a1.7 1.7 0 0 1-1.7 1.7H4.2a1.7 1.7 0 0 1-1.7-1.7V6.2Z" stroke="#4f586d" stroke-width="1.4" stroke-linejoin="round"/><circle cx="9" cy="9.4" r="2.6" stroke="#4f586d" stroke-width="1.4"/></svg>
-    Pick from Photo
+  <button class="next-btn" id="next-btn" style="margin-bottom: 18px;">
+    Use
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path d="M3.75 9H14.25M14.25 9L9.75 4.5M14.25 9L9.75 13.5"
+        stroke="rgba(255,255,255,0.85)" stroke-width="1.7"
+        stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
   </button>
+
 
   <!-- Saved palette -->
   <div class="saved-row">
@@ -615,14 +652,6 @@ html, body {
     </div>
   </div>
 
-  <button class="next-btn" id="next-btn" style="margin-bottom: 18px;">
-    Next
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <path d="M3.75 9H14.25M14.25 9L9.75 4.5M14.25 9L9.75 13.5"
-        stroke="rgba(255,255,255,0.85)" stroke-width="1.7"
-        stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </button>
 
   <div class="copyright">© 2026 Triple.Cell_illustration — 細胞日常插畫</div>
 
@@ -636,37 +665,6 @@ html, body {
     <button class="scale-dl-btn" id="scale-dl-btn">&#x2193; Download</button>
   </div>
   <div class="copyright" style="color:rgba(255,255,255,0.18);">© 2026 Triple.Cell_illustration — 細胞日常插畫</div>
-</div>
-
-<div class="page hidden" id="page-photo">
-  <div class="ph-top">
-    <button class="ph-close" id="ph-close" aria-label="Close">&times;</button>
-    <div class="ph-title">Pick from Photo</div>
-    <span style="width:34px"></span>
-  </div>
-  <div class="ph-row">
-    <button class="ph-pill" id="ph-cam-btn">Camera</button>
-    <button class="ph-pill" id="ph-lib-btn">Library</button>
-    <input type="file" id="ph-cam" accept="image/*" capture="environment" hidden>
-    <input type="file" id="ph-lib" accept="image/*" hidden>
-  </div>
-  <div class="ph-stage" id="ph-stage">
-    <canvas id="ph-canvas" width="4" height="3"></canvas>
-    <div class="ph-ring" id="ph-ring"></div>
-    <div class="ph-empty" id="ph-empty">Take a photo or choose one</div>
-  </div>
-  <div class="ph-row">
-    <button class="ph-pill" id="ph-wb-btn">White point</button>
-    <button class="ph-pill" id="ph-wb-reset">Reset</button>
-  </div>
-  <div class="ph-temp"><span>Cool</span><input type="range" id="ph-temp" min="-100" max="100" value="0"><span>Warm</span></div>
-  <div class="ph-hint" id="ph-hint">Tap the photo to pick a colour</div>
-  <div class="ph-dom" id="ph-dom"></div>
-  <div class="ph-pickrow">
-    <div class="ph-sw" id="ph-sw"></div>
-    <div class="ph-hex" id="ph-hex">&mdash;</div>
-    <button class="next-btn ph-use" id="ph-use" disabled>Use</button>
-  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1249,13 +1247,10 @@ var PH_LIN=[],PH_ENC=[];
 function phEnc(l){return PH_ENC[l>=1?4095:(l<=0?0:Math.round(l*4095))];}
 function phGains(){var t=PH.temp/100*0.3;return[PH.wb[0]*(1+t),PH.wb[1],PH.wb[2]*(1-t)];}
 
-function phOpen(){
-  document.getElementById("page-pick").classList.add("hidden");
-  document.getElementById("page-photo").classList.remove("hidden");
-}
-function phClose(){
-  document.getElementById("page-photo").classList.add("hidden");
-  document.getElementById("page-pick").classList.remove("hidden");
+function phToggle(){
+  var panel=document.getElementById("photo-panel"),open=panel.classList.toggle("open");
+  document.getElementById("photo-btn").classList.toggle("active",open);
+  if(open)setTimeout(function(){panel.scrollIntoView({behavior:"smooth",block:"nearest"});},50);
 }
 function phLoad(file){
   if(!file)return;
@@ -1301,10 +1296,12 @@ function phAvg(img,x,y,rad){
 }
 function phSelect(c){
   PH.picked=c;
-  var sw=document.getElementById("ph-sw"),hx=document.getElementById("ph-hex"),use=document.getElementById("ph-use");
-  if(!c){sw.style.background="";hx.innerHTML="&mdash;";use.disabled=true;return;}
-  var hex=rgbToHex(c.r,c.g,c.b);
-  sw.style.background=hex;hx.textContent=hex;use.disabled=false;
+  var sw=document.getElementById("ph-sw"),hx=document.getElementById("ph-hex");
+  if(!c){sw.style.background="";hx.innerHTML="&mdash;";return;}
+  sw.style.background=rgbToHex(c.r,c.g,c.b);hx.textContent=rgbToHex(c.r,c.g,c.b);
+  // apply straight to the main picker: colour block, field, hue and HEX all follow live
+  var hsb=rgbToHsb(c.r,c.g,c.b);state.h=hsb.h;state.s=hsb.s;state.b=hsb.b;
+  _drawField();updateUI();
 }
 function phSample(x,y){
   if(!PH.cur)return;
@@ -1356,8 +1353,7 @@ function phExtract(){
   });
 }
 
-document.getElementById("photo-btn").addEventListener("click",phOpen);
-document.getElementById("ph-close").addEventListener("click",phClose);
+document.getElementById("photo-btn").addEventListener("click",phToggle);
 document.getElementById("ph-cam-btn").addEventListener("click",function(){document.getElementById("ph-cam").click();});
 document.getElementById("ph-lib-btn").addEventListener("click",function(){document.getElementById("ph-lib").click();});
 ["ph-cam","ph-lib"].forEach(function(id){
@@ -1387,11 +1383,6 @@ phCv.addEventListener("pointerdown",function(e){
 });
 phCv.addEventListener("pointermove",function(e){if(phDown){var p=phXY(e);phSample(p.x,p.y);}});
 ["pointerup","pointercancel"].forEach(function(t){phCv.addEventListener(t,function(){phDown=false;});});
-document.getElementById("ph-use").addEventListener("click",function(){
-  var c=PH.picked;if(!c)return;
-  var hsb=rgbToHsb(c.r,c.g,c.b);state.h=hsb.h;state.s=hsb.s;state.b=hsb.b;
-  _drawField();updateUI();phClose();
-});
 </script>
 
 <!-- Update notification banner -->
