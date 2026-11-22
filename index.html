@@ -171,7 +171,7 @@ html, body {
   border-radius: 12px;
   padding: 10px 12px;
   font-family: var(--font);
-  font-size: 0.8rem;
+  font-size: 16px;
   letter-spacing: 0.16em;
   color: #4f586d;
   outline: none;
@@ -391,11 +391,13 @@ html, body {
 .photo-btn:active{transform:translateY(1px);}
 #photo-panel{display:none;flex-direction:column;align-items:center;gap:10px;width:min(84vw,340px);flex-shrink:0;}
 #photo-panel.open{display:flex;}
-.ph-pickrow{width:100%;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.ph-pickrow{cursor:pointer;-webkit-tap-highlight-color:transparent;width:100%;display:flex;align-items:center;gap:12px;flex-shrink:0;}
 .ph-sw{width:40px;height:40px;border-radius:10px;border:1.5px solid rgba(255,255,255,.7);box-shadow:0 2px 8px rgba(0,0,0,.14);background:rgba(79,88,109,.1);flex-shrink:0;}
 .ph-hex{font-size:0.85rem;letter-spacing:0.12em;color:var(--btn);}
 .ph-down{margin-left:auto;font-size:0.52rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--btn);opacity:.5;}
-.ph-label{width:min(84vw,340px);font-size:0.55rem;letter-spacing:0.24em;text-transform:uppercase;color:var(--btn);opacity:.38;flex-shrink:0;}
+.ph-labelrow{width:min(84vw,340px);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;}
+#ph-reset-color:disabled{opacity:.35;pointer-events:none;}
+.ph-label{font-size:0.55rem;letter-spacing:0.24em;text-transform:uppercase;color:var(--btn);opacity:.38;flex-shrink:0;}
 
 .ph-pill{padding:9px 14px;border-radius:100px;border:1.5px solid rgba(79,88,109,0.28);background:rgba(255,255,255,0.5);color:var(--btn);font-family:var(--font);font-size:0.58rem;letter-spacing:0.16em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .ph-pill.on{background:var(--btn);color:#fff;border-color:var(--btn);}
@@ -598,11 +600,14 @@ html, body {
     <div class="ph-pickrow">
       <div class="ph-sw" id="ph-sw"></div>
       <div class="ph-hex" id="ph-hex">&mdash;</div>
-      <div class="ph-down">&darr; fine-tune below</div>
+      <div class="ph-down">&#8634; tap to reset</div>
     </div>
   </div>
 
-  <div class="ph-label">Fine-tune</div>
+  <div class="ph-labelrow">
+    <div class="ph-label">Fine-tune</div>
+    <button class="ph-pill" id="ph-reset-color" disabled>&#8634; Reset to photo colour</button>
+  </div>
   <!-- Glass card — colour block only -->
   <div class="glass-card">
     <div class="colour-block" id="colour-block" style="cursor:pointer;">
@@ -1297,7 +1302,9 @@ function phAvg(img,x,y,rad){
 function phSelect(c){
   PH.picked=c;
   var sw=document.getElementById("ph-sw"),hx=document.getElementById("ph-hex");
-  if(!c){sw.style.background="";hx.innerHTML="&mdash;";return;}
+  var rb=document.getElementById("ph-reset-color");
+  if(!c){sw.style.background="";hx.innerHTML="&mdash;";rb.disabled=true;return;}
+  rb.disabled=false;
   sw.style.background=rgbToHex(c.r,c.g,c.b);hx.textContent=rgbToHex(c.r,c.g,c.b);
   // apply straight to the main picker: colour block, field, hue and HEX all follow live
   var hsb=rgbToHsb(c.r,c.g,c.b);state.h=hsb.h;state.s=hsb.s;state.b=hsb.b;
@@ -1354,6 +1361,13 @@ function phExtract(){
 }
 
 document.getElementById("photo-btn").addEventListener("click",phToggle);
+function phResetColor(){
+  if(!PH.picked)return;
+  phSelect(PH.picked);showToast("Back to photo colour");
+}
+document.getElementById("ph-reset-color").addEventListener("click",phResetColor);
+// tapping the swatch / hex under the photo also restores the photo colour
+document.querySelector(".ph-pickrow").addEventListener("click",phResetColor);
 document.getElementById("ph-cam-btn").addEventListener("click",function(){document.getElementById("ph-cam").click();});
 document.getElementById("ph-lib-btn").addEventListener("click",function(){document.getElementById("ph-lib").click();});
 ["ph-cam","ph-lib"].forEach(function(id){
